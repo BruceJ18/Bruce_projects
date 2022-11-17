@@ -1,6 +1,7 @@
 import pygame
 import os
 pygame.font.init()
+
 # Window
 WIDTH, HEIGHT = 1200, 900
 WIND = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -9,6 +10,7 @@ jungle_image = pygame.transform.scale(pygame.image.load(os.path.join('pixel_imag
 HEALTH_FONT = pygame.font.SysFont('comicsans', 40)
 LOZER_FONT = pygame.font.SysFont("comicsans", 200)
 FPS = 60
+
 # colors
 RED = (200, 5, 5)
 WHITE = (255, 255, 255)
@@ -25,11 +27,33 @@ indie_ldir = pygame.transform.flip(indie_rdir, True, False)
 indie_hit = pygame.USEREVENT
 indie_count = 0
 indie_health = 5
+indie_dy = 0
+floor_limit_indie = 900 - indie_height
+
 
 # spider
 spider_image = pygame.image.load(os.path.join("pixel_images", "pixel_spider.png"))
 spider_ldir = pygame.transform.rotate(pygame.transform.scale(spider_image, (spider_width, spider_height)), -10)
 spider_rdir = pygame.transform.flip(spider_ldir, True, False)
+floor_limit_spider = 900 - spider_height
+crawl_count = 0
+spider_vel = 12
+spider_left = False
+spider_right = False
+
+
+gravity = 4
+
+
+def indie_movement_y(indie):
+    global indie_dy
+    if indie_dy > 0 or indie.y < floor_limit_indie:
+        indie.y -= indie_dy
+        indie_dy -= gravity
+    if indie.y > floor_limit_indie:
+        indie.y = floor_limit_indie
+    if indie.y == floor_limit_indie and indie_dy < 0:
+        indie_dy = 0
 
 
 def collision(indie, spider):
@@ -41,17 +65,7 @@ def collision(indie, spider):
         indie.y -= 20
 
 
-def spider_movement_x(spider):
-    spider_vel = 12
-    if spider.x >= 0:
-        spider.x -= spider_vel
-        spider.y -= 0.1
-
-
-
-
 def show_on_wind(indie, spider):
-    global indie_count
     WIND.blit(jungle_image, (0, 0))
     indie_health_text = HEALTH_FONT.render("Health: " + str(indie_health), True, WHITE)
     WIND.blit(indie_health_text, (0, 0))
@@ -79,12 +93,11 @@ def lose(text):
 
 def main():
     global indie_health
-    floor_limit = 900 - indie_height
-    indie_dy = 0
-    gravity = 4
+    global floor_limit_indie
+    global indie_dy
 
-    indie = pygame.Rect(100, floor_limit, indie_width, indie_height)
-    spider = pygame.Rect(WIDTH - spider_width, HEIGHT - spider_height, spider_width, spider_height)
+    indie = pygame.Rect(100, floor_limit_indie, indie_width, indie_height)
+    spider = pygame.Rect(WIDTH - spider_width, floor_limit_spider, spider_width, spider_height)
 
 
     clock = pygame.time.Clock()
@@ -93,8 +106,10 @@ def main():
         clock.tick(FPS)
         show_on_wind(indie, spider)
         indie_movement_x(indie)
-        spider_movement_x(spider)
+        # spider_movement(spider)
         collision(indie, spider)
+        indie_movement_y(indie)
+
 
 
         for event in pygame.event.get():
@@ -104,9 +119,6 @@ def main():
                 indie_health -= 1
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE and indie_dy == 0:
-                    indie_rdir = False
-                    indie_l_dir = False
-                    indie_count = 0
                     indie_dy = 50
         lose_text = ""
         if indie_health <= 0:
@@ -114,13 +126,6 @@ def main():
         if lose_text != "":
             lose(lose_text)
             break
-        if indie_dy > 0 or indie.y < floor_limit:
-            indie.y -= indie_dy
-            indie_dy -= gravity
-        if indie.y > floor_limit:
-            indie.y = floor_limit
-        if indie.y == floor_limit and indie_dy < 0:
-            indie_dy = 0
 
 
 
