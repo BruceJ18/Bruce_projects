@@ -1,4 +1,4 @@
-Jungle Survivor
+# Jungle Survivor
 
 
 Jungle Survival : I utilized pygame to create a 2d arcade style game. The ultimate goal of this project is going to be to spawn multiple spiders as time increases.  Once 
