@@ -1,4 +1,4 @@
-# Jungles Survivor
+# Jungle Survivor
 
 Jungle Survival: 
 
